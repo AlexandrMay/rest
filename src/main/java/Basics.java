@@ -6,12 +6,15 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Properties;
 
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 public class Basics extends Caps {
+
+    Properties props = new Properties();
 
 
     @BeforeTest
@@ -23,14 +26,14 @@ public class Basics extends Caps {
     @Test
     public void Test() {
 
-        RestAssured.baseURI = host;
+        RestAssured.baseURI = props.getProperty("HOST");
         Response res = given().
                 header("Authorization", "Key " + apiKey(props.getProperty("siteKey"))).
                 header("Content-Type", "application/json").
                 body("{\"phone\":\"+380664853393\"}").
                 when().
                 put("/v1/office/registration.code").
-                then().assertThat().statusCode(200).and().contentType(ContentType.JSON).
+                then().assertThat().statusCode(200).and().contentType(ContentType.JSON).log().body().
                 and().body("success", equalTo(true)).
                 and().header("Server", "nginx").
                 extract().response();
@@ -45,6 +48,6 @@ public class Basics extends Caps {
                 body("{\"phone\":\"+380664853393\", \"code\":"+code+"}").
                 when().
                 put("/v1/office/registration.confirm").
-                then().assertThat().statusCode(200);
+                then().assertThat().statusCode(200).log().body();
     }
 }

@@ -1,12 +1,11 @@
 import org.apache.commons.codec.digest.DigestUtils;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Properties;
+
+
 
 public abstract class Caps {
 
-    Properties props = new Properties();
 
     public static String apiKey(String key) {
         Date date = new Date();
@@ -15,7 +14,7 @@ public abstract class Caps {
         return md5Hex;
     }
 
-    String host = props.getProperty("HOST");
+
 
 
 
