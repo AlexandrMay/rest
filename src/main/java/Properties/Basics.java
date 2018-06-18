@@ -37,13 +37,13 @@ public class Basics extends ReusableMethods {
                 and().body("success", equalTo(true)).
                 and().header("Server", "nginx").
                 extract().response();
-        JsonPath js = rawToJson(res);
-        int code = js.get("code");
+        //JsonPath js = rawToJson(res);
+       // int code = js.get("code");
 
         given().
                 header("Authorization", "Key " + apiKey(props.getProperty("siteKey"))).
                 header("Content-Type", "application/json").
-                body("{\"phone\":\"+380664853393\", \"code\":"+code+"}").
+                body("{\"phone\":\"+380664853393\", \"code\":"+11+"}").
                 when().
                 put("/v1/office/registration.confirm").
                 then().assertThat().statusCode(200).log().body();
