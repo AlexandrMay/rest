@@ -1,6 +1,8 @@
 package stepDefinations;
 
 import Properties.ReusableMethods;
+import cucumber.api.Scenario;
+import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -8,17 +10,12 @@ import cucumber.api.java.en.When;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
-
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
+
 
 public class Registration extends ReusableMethods {
 
@@ -29,8 +26,6 @@ public class Registration extends ReusableMethods {
     }
 
     Properties props = new Properties();
-    private Logger log = LogManager.getLogger(Registration.class.getName());
-
 
     @Before
     public void getData() throws IOException {
@@ -49,13 +44,14 @@ public class Registration extends ReusableMethods {
     public void i_send_the_request_with(String resource) {
         data.response = data.request.when().put(resource);
         System.out.println(data.response.prettyPrint());
+        data.r = rawToString(data.response);
     }
 
     @Then(("^I have statusCode (.+) and (.+) equals to (.+)$"))
     public void i_have_statuscode_and_equals_to(int statuscode, String keyword, boolean operand){
         data.json = data.response.then().assertThat().statusCode(statuscode).contentType(ContentType.JSON).body(keyword, equalTo(operand));
-        JsonPath js = rawToJson(data.json);
-        data.newCode = js.get("code");
+        data.js = rawToJson(data.json);
+        data.newCode = data.js.get("code");
         System.out.println("MY CODE IS "+data.newCode);
     }
 
@@ -63,6 +59,7 @@ public class Registration extends ReusableMethods {
     public void request_is_prepared_and_body_with_and_using_and(String key, String value, String code) {
         data.request = given().header("Authorization", "Key " + apiKey(props.getProperty("siteKey"))).
                 header("Content-Type", "application/json").body("{"+key+":"+value+","+code+":"+data.newCode+"}");
+        System.out.println(data.newCode);
     }
 
     @Then("^I expect statusCode (.+)$")
@@ -71,4 +68,10 @@ public class Registration extends ReusableMethods {
     }
 
 
+
+    @After
+    public void logs(Scenario scenario) {
+    byte[] log = data.r.getBytes();
+    scenario.embed(log, "text/html");
+    }
 }

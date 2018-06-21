@@ -6,7 +6,7 @@ Feature: UserRegistration
     Then I have statusCode <statusCode> and <keyword> equals to <operand>
     Examples:
     |key     |value      |resource                    |statusCode|keyword|operand|
-    |"phone"|"+380664853363"|/v1/office/registration.code|200|"success"  |true   |
+    |"phone"|"+380664853366"|/v1/office/registration.code|200|"success"  |true   |
 
 
 
@@ -16,4 +16,4 @@ Feature: UserRegistration
       Then I expect statusCode <statusCode>
       Examples:
       |key|value|resource|statusCode|code|
-      |"phone"|"+380664853363"|/v1/office/registration.confirm|200|"code"|
+      |"phone"|"+380664853366"|/v1/office/registration.confirm|200|"code"|
