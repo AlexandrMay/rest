@@ -31,22 +31,12 @@ public class BasicsTest extends ReusableMethods {
         RestAssured.baseURI = props.getProperty("HOST");
         Response res = given().header("Authorization", "Key " + apiKey(props.getProperty("siteKey"))).
                 header("Content-Type", "application/json").
-                body("{\"phone\":\"+380664853393\"}").
+                body("{\"phone\":\"+3806648533\"}").
                 when().
                 put("/v1/office/registration.code").
-                then().assertThat().statusCode(200).and().contentType(ContentType.JSON).log().body().
-                and().body("success", equalTo(true)).
-                and().header("Server", "nginx").
+                then().assertThat().statusCode(400).and().contentType(ContentType.JSON).log().body().
+               // and().body("success", equalTo(true)).
+                and().body("error.message", equalTo("Incorrect request body. Parameters: 'phone' are malformed or incorrect.")).
                 extract().response();
-       // JsonPath js = rawToJson(res);
-    //    int code = js.get("code");
-
-        given().
-                header("Authorization", "Key " + apiKey(props.getProperty("siteKey"))).
-                header("Content-Type", "application/json").
-         //       body("{\"phone\":\"+380664853393\", \"code\":"+code+"}").
-                when().
-                put("/v1/office/registration.confirm").
-                then().assertThat().statusCode(200).log().body();
     }
 }

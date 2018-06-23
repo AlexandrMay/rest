@@ -4,17 +4,22 @@ import Properties.ReusableMethods;
 import cucumber.api.Scenario;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
+import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
+import io.restassured.response.ValidatableResponse;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 
 
 public class Registration extends ReusableMethods {
@@ -26,6 +31,7 @@ public class Registration extends ReusableMethods {
     }
 
     Properties props = new Properties();
+
 
     @Before
     public void getData() throws IOException {
@@ -47,12 +53,24 @@ public class Registration extends ReusableMethods {
         data.r = rawToString(data.response);
     }
 
-    @Then(("^I have statusCode (.+) and (.+) equals to (.+)$"))
-    public void i_have_statuscode_and_equals_to(int statuscode, String keyword, boolean operand){
-        data.json = data.response.then().assertThat().statusCode(statuscode).contentType(ContentType.JSON).body(keyword, equalTo(operand));
+    @When("^I send the new request with (.+)$")
+    public void i_send_the_new_request_with(String resource) throws Throwable {
+        data.response = data.request.when().put(resource);
+        System.out.println(data.response.prettyPrint());
+        data.r = rawToString(data.response);
+    }
+
+
+    @And("^And (.+) equals to (.+)$")
+    public void and_equals_to(String key, boolean value) throws Throwable {
+           data.json.body(key, equalTo(value));
         data.js = rawToJson(data.json);
         data.newCode = data.js.get("code");
-        System.out.println("MY CODE IS "+data.newCode);
+    }
+
+    @And("^Response includes (.+) is (.+) and (.+) is (.+)$")
+    public void response_includes_is_and_is(String code, int receivedcode, String message, String receivedmessage) throws Throwable {
+        data.json.body(code, equalTo(receivedcode)).and().body(message, equalTo(receivedmessage));
     }
 
     @Given("^Request is prepared and body with (.+) and (.+) using (.+) with generated code$")
@@ -66,8 +84,6 @@ public class Registration extends ReusableMethods {
     public void i_expect_statuscode(int statuscode){
         data.json = data.response.then().assertThat().statusCode(statuscode);
     }
-
-
 
     @After
     public void logs(Scenario scenario) {
