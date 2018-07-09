@@ -9,20 +9,19 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import io.restassured.response.ValidatableResponse;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 
 
 public class Registration extends ReusableMethods {
+
+    private static String phoneNumber = getRandomPhone();
+
+
 
     private StepData data;
 
@@ -40,17 +39,68 @@ public class Registration extends ReusableMethods {
         RestAssured.baseURI = props.getProperty("HOST");
     }
 
-    @Given("^Request is prepared and body contains (.+) and (.+)$")
-    public void request_is_prepared(String key, String value) {
-        data.request = given().header("Authorization", "Key " + apiKey(props.getProperty("siteKey"))).
-                header("Content-Type", "application/json").body("{"+key+":"+value+"}");
+
+
+
+
+    @Given("^Сформирован запрос с корректным номером телефона$")
+    public void registration_code_given() throws Throwable {
+            data.request = given().header("Authorization", "Key " + apiKey(props.getProperty("siteKey"))).
+                    header("Content-Type", "application/json").body("{\"phone\": \""+phoneNumber+"\"}");
     }
 
-    @When("^I send the request with (.+)$")
-    public void i_send_the_request_with(String resource) {
-        data.response = data.request.when().put(resource);
+    @When("^Запрос отправлен на ресурс registration.code$")
+    public void registration_code_when() throws Throwable {
+            data.response = data.request.when().put(props.getProperty("registration.code"));
         System.out.println(data.response.prettyPrint());
         data.r = rawToString(data.response);
+    }
+
+    @Then("^Получен статус-код 200$")
+    public void registration_code_then() throws Throwable {
+        data.json = data.response.then().assertThat().statusCode(200);
+    }
+
+    @And("^Ответ содержит такие данные$")
+    public void registration_code_and(Map<String,Boolean> responseFields) throws Throwable {
+        for (Map.Entry<String, Boolean> field : responseFields.entrySet()) {
+            data.json.body(field.getKey(), equalTo(field.getValue()));
+        }
+            data.js = rawToJson(data.json);
+            data.newCode = data.js.get("code");
+    }
+
+    // Обработка метода registration.confirm, используя код, полученный посредством выполнения метода registration.code
+
+    @Given("^Формирую запрос с корректным номером телефона и кодом подтверждения$")
+    public void registration_confirm_given() throws Throwable {
+        data.request = given().header("Authorization", "Key " + apiKey(props.getProperty("siteKey"))).
+                header("Content-Type", "application/json").body("{\"phone\":\""+phoneNumber+"\",\"code\":"+data.newCode+"}");
+    }
+
+    @When("^Запрос отправлен на ресурс registration.confirm$")
+    public void registration_confirm_when() throws Throwable {
+        data.response = data.request.when().put(props.getProperty("registration.confirm"));
+        System.out.println(data.response.prettyPrint());
+        data.r = rawToString(data.response);
+    }
+
+    @And("^Ответ содержит handle$")
+    public void registration_confirm_and() throws Throwable {
+        data.js = rawToJson(data.json);
+        data.handle = data.js.get("handle");
+    }
+
+
+
+
+
+    // Обработака ошибок метода registration.code
+
+    @Given("^Request is prepared and body contains (.+) and (.+)$")
+    public void request_is_prepared_and_body_contains_and(String key, String value) throws Throwable {
+        data.request = given().header("Authorization", "Key " + apiKey(props.getProperty("siteKey"))).
+                header("Content-Type", "application/json").body("{"+key+": "+value+"}");
     }
 
     @When("^I send the new request with (.+)$")
@@ -60,24 +110,14 @@ public class Registration extends ReusableMethods {
         data.r = rawToString(data.response);
     }
 
-
-    @And("^And (.+) equals to (.+)$")
-    public void and_equals_to(String key, boolean value) throws Throwable {
-           data.json.body(key, equalTo(value));
-        data.js = rawToJson(data.json);
-        data.newCode = data.js.get("code");
+    @And("^Ответ содержит (.+) и (.+)$")
+    public void registration_code_errorcode(String arg1, int arg2) throws Throwable {
+        data.json = data.response.then().body(arg1, equalTo(arg2));
     }
 
-    @And("^Response includes (.+) is (.+) and (.+) is (.+)$")
-    public void response_includes_is_and_is(String code, int receivedcode, String message, String receivedmessage) throws Throwable {
-        data.json.body(code, equalTo(receivedcode)).and().body(message, equalTo(receivedmessage));
-    }
-
-    @Given("^Request is prepared and body with (.+) and (.+) using (.+) with generated code$")
-    public void request_is_prepared_and_body_with_and_using_and(String key, String value, String code) {
-        data.request = given().header("Authorization", "Key " + apiKey(props.getProperty("siteKey"))).
-                header("Content-Type", "application/json").body("{"+key+":"+value+","+code+":"+data.newCode+"}");
-        System.out.println(data.newCode);
+    @And("^А также (.+) и (.+)$")
+    public void registration_code_message(String arg1, String arg2) throws Throwable {
+        data.json = data.response.then().body(arg1, equalTo(arg2));
     }
 
     @Then("^I expect statusCode (.+)$")

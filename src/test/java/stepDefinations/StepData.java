@@ -13,4 +13,5 @@ public class StepData {
     protected static int newCode;
     protected String r;
     protected JsonPath js;
+    protected static String handle;
 }
