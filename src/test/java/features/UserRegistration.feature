@@ -1,6 +1,5 @@
 Feature: UserRegistration
 
-@NeedTo
   Scenario: registration.code
     Given Сформирован запрос с корректным номером телефона
     When Запрос отправлен на ресурс registration.code
@@ -10,15 +9,15 @@ Feature: UserRegistration
 
 
   Scenario Outline: registration.code ошибки
-    Given Request is prepared and body contains <key> and <value>
-    When I send the new request with <resource>
-    Then I expect statusCode <statusCode>
+    Given Запрос сформирован, в теле передан <телефон> и <номер>
+    When Я отправляю запрос на  <ресурс>
+    Then Получен такой статус-код <статус-код>
     And Ответ содержит <ключ ошибки> и <код ошибки>
     And А также <ключ сообщения> и <текст сообщения>
     Examples:
-      |key     |value      |resource                    |statusCode|ключ ошибки|код ошибки|ключ сообщения|текст сообщения|
+      |телефон     |номер      |ресурс                    |статус-код|ключ ошибки|код ошибки|ключ сообщения|текст сообщения|
       |"phone" |"+3806648533"|/v1/office/registration.code|400   |error.code   |7         |error.message |Incorrect request body. Parameters: 'phone' are malformed or incorrect.|
-      |"phone" |"+380664853398"|/v1/office/registration.code|409   |error.code |8         |error.message |Given phone already exists in the system.                              |
+      |"phone" |"+380664853398"|/v1/office/registration.code|409   |error.code |7         |error.message |Given phone already exists in the system.                              |
       |"phone" |""|/v1/office/registration.code|400   |error.code              |6         |error.message |Incorrect request body. Parameters: 'phone' are required.              |
 
 

@@ -31,16 +31,12 @@ public class Registration extends ReusableMethods {
 
     Properties props = new Properties();
 
-
     @Before
     public void getData() throws IOException {
         FileInputStream fis = new FileInputStream("src/main/java/Properties/env.properties");
         props.load(fis);
         RestAssured.baseURI = props.getProperty("HOST");
     }
-
-
-
 
 
     @Given("^Сформирован запрос с корректным номером телефона$")
@@ -97,13 +93,13 @@ public class Registration extends ReusableMethods {
 
     // Обработака ошибок метода registration.code
 
-    @Given("^Request is prepared and body contains (.+) and (.+)$")
+    @Given("^Запрос сформирован, в теле передан (.+) и (.+)$")
     public void request_is_prepared_and_body_contains_and(String key, String value) throws Throwable {
         data.request = given().header("Authorization", "Key " + apiKey(props.getProperty("siteKey"))).
                 header("Content-Type", "application/json").body("{"+key+": "+value+"}");
     }
 
-    @When("^I send the new request with (.+)$")
+    @When("^Я отправляю запрос на  (.+)$")
     public void i_send_the_new_request_with(String resource) throws Throwable {
         data.response = data.request.when().put(resource);
         System.out.println(data.response.prettyPrint());
@@ -120,7 +116,7 @@ public class Registration extends ReusableMethods {
         data.json = data.response.then().body(arg1, equalTo(arg2));
     }
 
-    @Then("^I expect statusCode (.+)$")
+    @Then("^Получен такой статус-код (.+)$")
     public void i_expect_statuscode(int statuscode){
         data.json = data.response.then().assertThat().statusCode(statuscode);
     }
