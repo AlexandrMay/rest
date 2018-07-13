@@ -21,8 +21,6 @@ public class Registration extends ReusableMethods {
 
     private static String phoneNumber = getRandomPhone();
 
-
-
     private StepData data;
 
     public Registration(StepData data) {
@@ -37,7 +35,6 @@ public class Registration extends ReusableMethods {
         props.load(fis);
         RestAssured.baseURI = props.getProperty("HOST");
     }
-
 
     @Given("^Сформирован запрос с корректным номером телефона$")
     public void registration_code_given() throws Throwable {
@@ -79,6 +76,7 @@ public class Registration extends ReusableMethods {
         data.response = data.request.when().put(props.getProperty("registration.confirm"));
         System.out.println(data.response.prettyPrint());
         data.r = rawToString(data.response);
+
     }
 
     @And("^Ответ содержит handle$")
@@ -104,6 +102,8 @@ public class Registration extends ReusableMethods {
         data.response = data.request.when().put(resource);
         System.out.println(data.response.prettyPrint());
         data.r = rawToString(data.response);
+
+
     }
 
     @And("^Ответ содержит (.+) и (.+)$")
@@ -123,7 +123,8 @@ public class Registration extends ReusableMethods {
 
     @After
     public void logs(Scenario scenario) {
-    byte[] log = data.r.getBytes();
-    scenario.embed(log, "text/html");
+        byte[] log = data.r.getBytes();
+        scenario.embed(log, "text/html");
     }
+
 }

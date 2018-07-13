@@ -17,9 +17,12 @@ Feature: UserRegistration
     Examples:
       |телефон     |номер      |ресурс                    |статус-код|ключ ошибки|код ошибки|ключ сообщения|текст сообщения|
       |"phone" |"+3806648533"|/v1/office/registration.code|400   |error.code   |7         |error.message |Incorrect request body. Parameters: 'phone' are malformed or incorrect.|
-      |"phone" |"+380664853398"|/v1/office/registration.code|409   |error.code |7         |error.message |Given phone already exists in the system.                              |
+      |"phone" |"+380664853398"|/v1/office/registration.code|409   |error.code |8         |error.message |Given phone already exists in the system.                              |
       |"phone" |""|/v1/office/registration.code|400   |error.code              |6         |error.message |Incorrect request body. Parameters: 'phone' are required.              |
-
+      |"phon"  |"+380664853399"|/v1/office/registration.code|400|error.code    |5         |error.message |Incorrect request body. Parameters: 'phon' are unknown.                |
+      |"phone" |"+380664853399"|/v1/office/registration.cod |404|code    |100       |message |Requested resource were not found at given endpoint.                   |
+      |"phone" |"380664853399" |/v1/office/registration.code|400|error.code    |7         |error.message |Incorrect request body. Parameters: 'phone' are malformed or incorrect.|
+      |"phone"|"+38066485339945679"|/v1/office/registration.code|400|error.code    |7         |error.message |Incorrect request body. Parameters: 'phone' are malformed or incorrect.|
 
   Scenario: registration.confirm
     Given Формирую запрос с корректным номером телефона и кодом подтверждения
